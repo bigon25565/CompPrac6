@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Size Checker</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        #preview { max-width: 300px; display: none; margin-top: 10px; }
+        #result { margin-top: 10px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <h1>Upload a PNG Image</h1>
+    <input type="file" id="fileInput" accept="image/png">
+    <button onclick="uploadImage()">Upload</button>
+    <br>
+    <img id="preview">
+    <div id="result"></div>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a PNG image.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/size2json', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.result === "invalid filetype") {
+                    document.getElementById('result').innerText = "Invalid file type. Please upload a PNG image.";
+                } else {
+                    document.getElementById('result').innerText = `Width: ${data.width}, Height: ${data.height}`;
+                    const img = document.getElementById('preview');
+                    img.src = URL.createObjectURL(file);
+                    img.style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = "Error uploading image.";
+            }
+        }
+    </script>
+</body>
+</html>
